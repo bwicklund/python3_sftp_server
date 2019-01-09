@@ -5,7 +5,7 @@ import os
 from sftp_server.sftp_server import SFTPServer
 
 SSH_PORT = 2222
-FILE_ROOT = os.path.realpath('/Users/bwicklun/Projects')
+FILE_ROOT = os.path.realpath('/')
 HOST_KEY = os.path.join(os.path.dirname(__file__), 'host_key')
 
 # Example Auth System...
