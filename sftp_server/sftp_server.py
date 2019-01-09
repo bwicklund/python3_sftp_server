@@ -6,6 +6,7 @@ import paramiko
 from .ssh_interface import SSHInterface
 from .sftp_interface import SFTPInterface
 
+
 class SFTPServer(object):
     """
     Stand up a SFTP server

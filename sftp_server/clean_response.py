@@ -1,11 +1,13 @@
 import functools
 import paramiko
 
+
 def clean_response(fn):
     """
     Dectorator which converts exceptions into appropriate SFTP error codes,
     returns OK for functions which don't have a return value
     """
+
     @functools.wraps(fn)
     def wrapper(*args, **kwargs):
         try:
@@ -21,4 +23,5 @@ def clean_response(fn):
             return paramiko.SFTP_OK
         else:
             return value
+
     return wrapper

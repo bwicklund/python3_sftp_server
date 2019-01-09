@@ -7,8 +7,10 @@ from .log_it import log_it
 from .clean_response import clean_response
 from .sftp_file_handle import SFTPFileHandle
 
+
 class PermissionDenied(Exception):
     pass
+
 
 class SFTPInterface(paramiko.SFTPServerInterface):
     FILE_MODE = 0o664
@@ -25,7 +27,7 @@ class SFTPInterface(paramiko.SFTPServerInterface):
         return self._realpath(path, self.user.has_write_access)
 
     def _realpath(self, path, permission_check):
-        path = self.canonicalize(path).lstrip('/')
+        path = self.canonicalize(path).lstrip("/")
         if not permission_check(path):
             raise PermissionDenied()
         return os.path.join(self.root, path)
@@ -34,7 +36,7 @@ class SFTPInterface(paramiko.SFTPServerInterface):
     @log_it
     def open(self, path, flags, attr):
         # We ignore `attr` -- we choose the permissions
-        read_only = (flags == os.O_RDONLY)
+        read_only = flags == os.O_RDONLY
         if read_only:
             realpath = self.realpath_for_read(path)
         else:
@@ -51,8 +53,10 @@ class SFTPInterface(paramiko.SFTPServerInterface):
     @log_it
     def list_folder(self, path):
         realpath = self.realpath_for_read(path)
-        return [self.sftp_attributes(os.path.join(realpath, filename))
-                    for filename in os.listdir(realpath)]
+        return [
+            self.sftp_attributes(os.path.join(realpath, filename))
+            for filename in os.listdir(realpath)
+        ]
 
     @clean_response
     @log_it
@@ -104,32 +108,29 @@ class SFTPInterface(paramiko.SFTPServerInterface):
         target = os.readlink(realpath)
         if os.path.isabs(target):
             return paramiko.SFTP_OP_UNSUPPORTED
-        target_abs = os.path.normpath(os.path.join(
-            os.path.dirname(realpath), target))
-        if not target_abs.startswith(self.root + '/'):
+        target_abs = os.path.normpath(os.path.join(os.path.dirname(realpath), target))
+        if not target_abs.startswith(self.root + "/"):
             return paramiko.SFTP_OP_UNSUPPORTED
         return target
 
     def sftp_attributes(self, filepath, follow_links=False):
         filename = os.path.basename(filepath)
         stat = os.stat if follow_links else os.lstat
-        return paramiko.SFTPAttributes.from_stat(
-            stat(filepath), filename=filename)
-
+        return paramiko.SFTPAttributes.from_stat(stat(filepath), filename=filename)
 
     def flags_to_string(self, flags):
         if flags & os.O_WRONLY:
             if flags & os.O_APPEND:
-                mode = 'a'
+                mode = "a"
             else:
-                mode = 'w'
+                mode = "w"
         elif flags & os.O_RDWR:
             if flags & os.O_APPEND:
-                mode = 'a+'
+                mode = "a+"
             else:
-                mode = 'r+'
+                mode = "r+"
         else:
-            mode = 'r'
+            mode = "r"
         # Force binary mode
-        mode += 'b'
+        mode += "b"
         return mode
